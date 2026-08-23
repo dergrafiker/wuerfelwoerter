@@ -297,6 +297,10 @@ h1 .cap{color:var(--gold)}
   transition:width .4s ease;
 }
 .ent-note{margin-top:.7rem;font-size:.85rem;color:var(--sage)}
+.tiers{margin-top:.45rem;display:flex;flex-direction:column;gap:.25rem}
+.tiers>div{display:flex;justify-content:space-between;align-items:baseline;gap:1rem;flex-wrap:wrap}
+.tiers dt small{color:var(--sage-dim);font-size:.9em}
+.tiers dd{color:var(--ivory-shade);font-weight:600;text-align:right}
 
 /* ---------- Footer ---------- */
 .info{
@@ -389,7 +393,16 @@ h1 .cap{color:var(--gold)}
     <div class="ent-label" id="entLabel"></div>
   </div>
   <div class="ent-bar"><div class="ent-fill" id="entFill" style="width:0%"></div></div>
-  <div class="ent-note" id="entNote"></div>
+  <div class="ent-note">
+    <p>Durchschnittliche Knackzeit bei einem Offline-Angriff (halber Suchraum), je nach Angreifer:</p>
+    <!-- Die Raten stehen als data-gps im Markup; app.js liest sie von hier,
+         damit eine neue Stufe nicht stillschweigend an der Anzeige vorbeilaeuft. -->
+    <dl class="tiers" id="entTiers">
+      <div><dt>Einzelne High-End-GPU <small>(350 Mrd. Versuche/s)</small></dt><dd data-gps="350e9">–</dd></div>
+      <div><dt>Professioneller Cluster <small>(1 Billion Versuche/s)</small></dt><dd data-gps="1e12">–</dd></div>
+      <div><dt>Staatlicher Angreifer <small>(1 Billiarde Versuche/s)</small></dt><dd data-gps="1e15">–</dd></div>
+    </dl>
+  </div>
 </div>
 
 <div class="info">
