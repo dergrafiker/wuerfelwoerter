@@ -5,9 +5,15 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Würfelwörter – deutsche Passphrasen, lokal gewürfelt</title>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700;9..144,900&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap');
-
+/* Bewusst keine Webfonts: die Seite verspricht, dass nichts den Rechner
+   verlaesst - ein Font-Import wuerde bei jedem Aufruf IP und User-Agent an
+   einen Dritten senden. Wer die Originalschriften moechte, legt sie lokal ab
+   und traegt sie vorne in die drei Stacks unten ein. */
 :root{
+  --font-display:ui-serif,Georgia,'Times New Roman',serif;
+  --font-sans:system-ui,-apple-system,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;
+  --font-mono:ui-monospace,SFMono-Regular,'SF Mono',Menlo,Consolas,'DejaVu Sans Mono',monospace;
+
   --felt:#1E3A2A;
   --felt-deep:#152B1F;
   --ivory:#F3EEE1;
@@ -27,7 +33,7 @@ body{
     radial-gradient(ellipse 120% 80% at 50% -10%, #2A4A36 0%, var(--felt) 45%, var(--felt-deep) 100%);
   min-height:100vh;
   color:var(--ivory);
-  font-family:'IBM Plex Sans',system-ui,sans-serif;
+  font-family:var(--font-sans);
   display:flex;
   flex-direction:column;
   align-items:center;
@@ -46,7 +52,7 @@ header{text-align:center;margin-bottom:2.2rem}
   margin-bottom:.4rem;
 }
 h1{
-  font-family:'Fraunces',serif;
+  font-family:var(--font-display);
   font-weight:900;
   font-size:clamp(2rem,6vw,2.9rem);
   letter-spacing:-.02em;
@@ -74,7 +80,7 @@ h1 .cap{color:var(--gold)}
 .tile{
   background:linear-gradient(175deg,#FBF7EC 0%,var(--ivory) 55%,var(--ivory-shade) 100%);
   color:var(--ink);
-  font-family:'IBM Plex Mono',monospace;
+  font-family:var(--font-mono);
   font-weight:600;
   font-size:clamp(1rem,3vw,1.3rem);
   padding:.55em .7em .5em;
@@ -127,7 +133,7 @@ h1 .cap{color:var(--gold)}
   border:1px solid rgba(243,238,225,.14);
   border-radius:var(--radius);
   color:var(--ivory);
-  font-family:'IBM Plex Mono',monospace;
+  font-family:var(--font-mono);
   font-size:.95rem;
   padding:.8rem 1rem;
   overflow-x:auto;
@@ -136,7 +142,7 @@ h1 .cap{color:var(--gold)}
   line-height:1.4;
 }
 .btn{
-  font-family:'IBM Plex Sans',sans-serif;
+  font-family:var(--font-sans);
   font-weight:600;
   font-size:.95rem;
   border:none;
@@ -154,13 +160,14 @@ h1 .cap{color:var(--gold)}
 }
 .btn-copy:hover{background:rgba(243,238,225,.22)}
 .btn-copy.done{background:var(--sage-dim);border-color:transparent;color:var(--felt-deep)}
+.btn-copy.fail{background:var(--pip);border-color:transparent;color:var(--ivory)}
 
 /* ---------- Roll button ---------- */
 .rollrow{text-align:center;margin-bottom:2.4rem}
 .btn-roll{
   background:linear-gradient(175deg,#FBF7EC,var(--ivory-shade));
   color:var(--ink);
-  font-family:'Fraunces',serif;
+  font-family:var(--font-display);
   font-weight:700;
   font-size:1.25rem;
   padding:.75rem 2.4rem;
@@ -200,7 +207,7 @@ h1 .cap{color:var(--gold)}
 }
 .seg{display:flex;gap:.4rem;flex-wrap:wrap}
 .seg button{
-  font-family:'IBM Plex Mono',monospace;
+  font-family:var(--font-mono);
   font-size:.95rem;
   background:rgba(243,238,225,.08);
   color:var(--ivory);
@@ -232,7 +239,7 @@ h1 .cap{color:var(--gold)}
 .stepper button:hover{background:rgba(243,238,225,.18)}
 .stepper button:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
 .stepper .val{
-  font-family:'IBM Plex Mono',monospace;
+  font-family:var(--font-mono);
   font-size:1.4rem;
   font-weight:600;
   min-width:1.6rem;
@@ -272,8 +279,8 @@ h1 .cap{color:var(--gold)}
   margin-bottom:2rem;
 }
 .ent-top{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:.7rem;flex-wrap:wrap;gap:.3rem}
-.ent-bits{font-family:'Fraunces',serif;font-weight:700;font-size:1.5rem}
-.ent-bits small{font-family:'IBM Plex Sans',sans-serif;font-weight:400;font-size:.85rem;color:var(--sage)}
+.ent-bits{font-family:var(--font-display);font-weight:700;font-size:1.5rem}
+.ent-bits small{font-family:var(--font-sans);font-weight:400;font-size:.85rem;color:var(--sage)}
 .ent-label{font-size:.9rem;font-weight:600}
 .ent-bar{
   height:10px;
@@ -401,23 +408,34 @@ const state = { words: 5, sep: "-", useNum: true, digits: 2 };
 let current = { parts: [], number: "" };
 
 // ---------- Kryptographisch sicherer Zufall ----------
+const UINT32_RANGE = 4294967296;
+
 function randInt(max) {
-  const limit = 4294967296 - (4294967296 % max);
+  // Ohne diese Pruefung liefert max <= 0 kommentarlos NaN: 4294967296 % 0 ist
+  // NaN, die Schleife bricht sofort ab und x % 0 ist wieder NaN. Das landete
+  // dann unbemerkt in der Passphrase.
+  if (!Number.isInteger(max) || max < 1 || max > UINT32_RANGE) {
+    throw new RangeError("randInt: max muss ganzzahlig zwischen 1 und 2^32 liegen, war: " + max);
+  }
+  // Den ueberhaengenden Restbereich verwerfen, sonst entsteht Modulo-Bias.
+  const limit = UINT32_RANGE - (UINT32_RANGE % max);
   const buf = new Uint32Array(1);
   let x;
   do { crypto.getRandomValues(buf); x = buf[0]; } while (x >= limit);
   return x % max;
 }
 
+function randomDigits(count) {
+  let out = "";
+  for (let i = 0; i < count; i++) out += randInt(10);
+  return out;
+}
+
 // ---------- Generieren ----------
 function roll() {
   const parts = [];
   for (let i = 0; i < state.words; i++) parts.push(POOL[randInt(POOL.length)]);
-  let number = "";
-  if (state.useNum) {
-    for (let i = 0; i < state.digits; i++) number += randInt(10);
-  }
-  current = { parts, number };
+  current = { parts, number: state.useNum ? randomDigits(state.digits) : "" };
   render();
 }
 
@@ -481,19 +499,24 @@ function renderEntropy() {
     "Durchschnittliche Knackzeit bei 1 Billion Versuchen pro Sekunde (Offline-Angriff): " + humanTime(seconds) + ".";
 }
 
+const TIME_UNITS = [
+  [31557600 * 1e9, "Mrd. Jahre"],
+  [31557600 * 1e6, "Mio. Jahre"],
+  [31557600 * 1e3, "Tsd. Jahre"],
+  [31557600, "Jahre"],
+  [86400, "Tage"],
+  [3600, "Stunden"],
+  [60, "Minuten"],
+  [1, "Sekunden"]
+];
+
 function humanTime(s) {
+  // NaN ist kleiner-als-1-Vergleichen gegenueber immun und rutschte frueher
+  // stillschweigend als "unter einer Sekunde" durch.
+  if (Number.isNaN(s)) return "unbekannt";
+  if (s === Infinity) return "praktisch unendlich lange";
   if (s < 1) return "unter einer Sekunde";
-  const units = [
-    [31557600 * 1e9, "Mrd. Jahre"],
-    [31557600 * 1e6, "Mio. Jahre"],
-    [31557600 * 1e3, "Tsd. Jahre"],
-    [31557600, "Jahre"],
-    [86400, "Tage"],
-    [3600, "Stunden"],
-    [60, "Minuten"],
-    [1, "Sekunden"]
-  ];
-  for (const [u, name] of units) {
+  for (const [u, name] of TIME_UNITS) {
     if (s >= u) {
       const v = s / u;
       const num = v >= 100 ? Math.round(v).toLocaleString("de-DE")
@@ -501,34 +524,70 @@ function humanTime(s) {
       return "ca. " + num + " " + name;
     }
   }
-  return "unter einer Sekunde";
+  return "unter einer Sekunde"; // unerreichbar: s >= 1 trifft immer die Sekunden-Einheit
 }
 
 // ---------- Bedienung ----------
+// Timer-Handles, damit schnelle Mehrfachklicks sich nicht gegenseitig
+// zuruecksetzen: ohne clearTimeout beendet der erste Timer den Zustand des
+// letzten Klicks zu frueh.
+let rollTimer = 0;
+let copyTimer = 0;
+
 document.getElementById("rollBtn").addEventListener("click", (e) => {
   const btn = e.currentTarget;
   btn.classList.add("rolling");
-  setTimeout(() => btn.classList.remove("rolling"), 400);
+  clearTimeout(rollTimer);
+  rollTimer = setTimeout(() => btn.classList.remove("rolling"), 400);
   roll();
 });
 
-document.getElementById("copyBtn").addEventListener("click", async () => {
-  const btn = document.getElementById("copyBtn");
+// Gibt zurueck, ob wirklich kopiert wurde - der Button darf keinen Erfolg
+// melden, den es nicht gab.
+function legacyCopy() {
+  const sel = window.getSelection();
+  if (!sel) return false;
+  const range = document.createRange();
+  range.selectNodeContents(document.getElementById("phraseOut"));
+  sel.removeAllRanges();
+  sel.addRange(range);
+  let ok = false;
   try {
-    await navigator.clipboard.writeText(phraseString());
-  } catch (err) {
-    // Fallback: Text markieren
-    const out = document.getElementById("phraseOut");
-    const range = document.createRange();
-    range.selectNodeContents(out);
-    const sel = getSelection();
-    sel.removeAllRanges();
-    sel.addRange(range);
-    document.execCommand("copy");
+    ok = document.execCommand("copy");
+  } catch {
+    ok = false;
   }
-  btn.textContent = "Kopiert";
-  btn.classList.add("done");
-  setTimeout(() => { btn.textContent = "Kopieren"; btn.classList.remove("done"); }, 1500);
+  // Bei Erfolg die Markierung aufraeumen; scheitert es, bleibt die Phrase
+  // markiert, damit man von Hand kopieren kann.
+  if (ok) sel.removeAllRanges();
+  return ok;
+}
+
+async function copyPhrase() {
+  // In unsicheren Kontexten fehlt navigator.clipboard komplett.
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    try {
+      await navigator.clipboard.writeText(phraseString());
+      return true;
+    } catch {
+      // Verweigert oder abgebrochen - unten der aeltere Weg.
+    }
+  }
+  return legacyCopy();
+}
+
+document.getElementById("copyBtn").addEventListener("click", async () => {
+  const ok = await copyPhrase();
+  // Nach dem await ist e.currentTarget bereits null, daher der erneute Zugriff.
+  const btn = document.getElementById("copyBtn");
+  btn.textContent = ok ? "Kopiert" : "Fehlgeschlagen";
+  btn.classList.toggle("done", ok);
+  btn.classList.toggle("fail", !ok);
+  clearTimeout(copyTimer);
+  copyTimer = setTimeout(() => {
+    btn.textContent = "Kopieren";
+    btn.classList.remove("done", "fail");
+  }, ok ? 1500 : 3000);
 });
 
 document.getElementById("wMinus").addEventListener("click", () => {
@@ -552,21 +611,20 @@ document.getElementById("numSwitch").addEventListener("click", (e) => {
   state.useNum = !state.useNum;
   e.currentTarget.setAttribute("aria-checked", String(state.useNum));
   document.getElementById("numState").textContent = state.useNum ? "an" : "aus";
-  if (state.useNum && !current.number) {
-    let n = ""; for (let i = 0; i < state.digits; i++) n += randInt(10);
-    current.number = n;
-  }
+  // Beim Ausschalten verwerfen, beim Einschalten frisch wuerfeln. Vorher wurde
+  // current.number nie geleert, wodurch die alte Bedingung nie zutraf und nach
+  // einem Aus/An-Zyklus wieder exakt dieselbe Zahl erschien.
+  current.number = state.useNum ? randomDigits(state.digits) : "";
   render();
 });
 
 document.getElementById("digitSeg").addEventListener("click", (e) => {
   const b = e.target.closest("button");
   if (!b) return;
-  state.digits = parseInt(b.dataset.d, 10);
+  state.digits = Number(b.dataset.d);
   for (const btn of e.currentTarget.querySelectorAll("button"))
     btn.setAttribute("aria-pressed", btn === b ? "true" : "false");
-  let n = ""; for (let i = 0; i < state.digits; i++) n += randInt(10);
-  current.number = n;
+  current.number = state.useNum ? randomDigits(state.digits) : "";
   render();
 });
 
