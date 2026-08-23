@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Würfelwörter – deutsche Passphrasen, lokal gewürfelt</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700;9..144,900&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap');
+
+:root{
+  --felt:#1E3A2A;
+  --felt-deep:#152B1F;
+  --ivory:#F3EEE1;
+  --ivory-shade:#DDD5C2;
+  --ink:#1B1B17;
+  --pip:#C33B2C;
+  --sage:#9DBBA6;
+  --sage-dim:#6E8F79;
+  --gold:#D9B95C;
+  --radius:14px;
+}
+
+*{box-sizing:border-box;margin:0;padding:0}
+
+body{
+  background:
+    radial-gradient(ellipse 120% 80% at 50% -10%, #2A4A36 0%, var(--felt) 45%, var(--felt-deep) 100%);
+  min-height:100vh;
+  color:var(--ivory);
+  font-family:'IBM Plex Sans',system-ui,sans-serif;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  padding:2.5rem 1rem 4rem;
+}
+
+.wrap{width:100%;max-width:760px}
+
+/* ---------- Header ---------- */
+header{text-align:center;margin-bottom:2.2rem}
+.die-mark{
+  display:inline-block;
+  font-size:1.6rem;
+  color:var(--gold);
+  transform:rotate(-8deg);
+  margin-bottom:.4rem;
+}
+h1{
+  font-family:'Fraunces',serif;
+  font-weight:900;
+  font-size:clamp(2rem,6vw,2.9rem);
+  letter-spacing:-.02em;
+  line-height:1.05;
+}
+h1 .cap{color:var(--gold)}
+.tagline{
+  margin-top:.6rem;
+  color:var(--sage);
+  font-size:.95rem;
+  max-width:34rem;
+  margin-left:auto;margin-right:auto;
+}
+
+/* ---------- Tiles ---------- */
+.tiles{
+  display:flex;
+  flex-wrap:wrap;
+  gap:.55rem;
+  justify-content:center;
+  min-height:3.6rem;
+  margin-bottom:1rem;
+  perspective:600px;
+}
+.tile{
+  background:linear-gradient(175deg,#FBF7EC 0%,var(--ivory) 55%,var(--ivory-shade) 100%);
+  color:var(--ink);
+  font-family:'IBM Plex Mono',monospace;
+  font-weight:600;
+  font-size:clamp(1rem,3vw,1.3rem);
+  padding:.55em .7em .5em;
+  border-radius:10px;
+  box-shadow:
+    0 3px 0 #B9B098,
+    0 6px 14px rgba(0,0,0,.35);
+  position:relative;
+  animation:flip .45s cubic-bezier(.2,.9,.3,1.2) both;
+}
+.tile.noun::after{
+  content:"";
+  position:absolute;
+  top:6px;right:6px;
+  width:7px;height:7px;
+  border-radius:50%;
+  background:var(--pip);
+}
+.tile.num{
+  background:linear-gradient(175deg,#2E5540,#22402F);
+  color:var(--gold);
+  box-shadow:0 3px 0 #10241A,0 6px 14px rgba(0,0,0,.35);
+}
+.tile.sep{
+  background:none;
+  box-shadow:none;
+  color:var(--sage-dim);
+  padding:.55em .1em;
+  animation:none;
+  font-weight:400;
+}
+@keyframes flip{
+  from{transform:rotateX(80deg) translateY(-8px);opacity:0}
+  to{transform:rotateX(0) translateY(0);opacity:1}
+}
+@media (prefers-reduced-motion: reduce){
+  .tile{animation:none}
+}
+
+/* ---------- Copy line ---------- */
+.copyline{
+  display:flex;
+  gap:.6rem;
+  align-items:stretch;
+  margin-bottom:2rem;
+}
+.phrase-out{
+  flex:1;
+  background:rgba(0,0,0,.28);
+  border:1px solid rgba(243,238,225,.14);
+  border-radius:var(--radius);
+  color:var(--ivory);
+  font-family:'IBM Plex Mono',monospace;
+  font-size:.95rem;
+  padding:.8rem 1rem;
+  overflow-x:auto;
+  white-space:nowrap;
+  user-select:all;
+  line-height:1.4;
+}
+.btn{
+  font-family:'IBM Plex Sans',sans-serif;
+  font-weight:600;
+  font-size:.95rem;
+  border:none;
+  border-radius:var(--radius);
+  cursor:pointer;
+  transition:transform .08s ease, box-shadow .15s ease, background .15s ease;
+}
+.btn:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+.btn-copy{
+  background:rgba(243,238,225,.12);
+  color:var(--ivory);
+  padding:0 1.1rem;
+  border:1px solid rgba(243,238,225,.2);
+  white-space:nowrap;
+}
+.btn-copy:hover{background:rgba(243,238,225,.22)}
+.btn-copy.done{background:var(--sage-dim);border-color:transparent;color:var(--felt-deep)}
+
+/* ---------- Roll button ---------- */
+.rollrow{text-align:center;margin-bottom:2.4rem}
+.btn-roll{
+  background:linear-gradient(175deg,#FBF7EC,var(--ivory-shade));
+  color:var(--ink);
+  font-family:'Fraunces',serif;
+  font-weight:700;
+  font-size:1.25rem;
+  padding:.75rem 2.4rem;
+  border-radius:16px;
+  box-shadow:0 4px 0 #B9B098,0 10px 22px rgba(0,0,0,.4);
+}
+.btn-roll:hover{transform:translateY(-2px);box-shadow:0 6px 0 #B9B098,0 14px 26px rgba(0,0,0,.45)}
+.btn-roll:active{transform:translateY(2px);box-shadow:0 2px 0 #B9B098,0 6px 12px rgba(0,0,0,.4)}
+.btn-roll .die{
+  display:inline-block;
+  margin-right:.45rem;
+  color:var(--pip);
+  transition:transform .4s ease;
+}
+.btn-roll.rolling .die{transform:rotate(360deg)}
+
+/* ---------- Controls ---------- */
+.panel{
+  background:rgba(0,0,0,.22);
+  border:1px solid rgba(243,238,225,.12);
+  border-radius:18px;
+  padding:1.4rem 1.5rem;
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:1.4rem 2rem;
+  margin-bottom:1.6rem;
+}
+@media (max-width:560px){.panel{grid-template-columns:1fr}}
+.ctl label,.ctl .lbl{
+  display:block;
+  font-size:.78rem;
+  letter-spacing:.09em;
+  text-transform:uppercase;
+  color:var(--sage);
+  margin-bottom:.55rem;
+  font-weight:600;
+}
+.seg{display:flex;gap:.4rem;flex-wrap:wrap}
+.seg button{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:.95rem;
+  background:rgba(243,238,225,.08);
+  color:var(--ivory);
+  border:1px solid rgba(243,238,225,.16);
+  border-radius:9px;
+  padding:.45rem .8rem;
+  cursor:pointer;
+  min-width:2.6rem;
+  transition:background .12s;
+}
+.seg button:hover{background:rgba(243,238,225,.18)}
+.seg button[aria-pressed="true"]{
+  background:var(--ivory);
+  color:var(--ink);
+  border-color:var(--ivory);
+  font-weight:600;
+}
+.seg button:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+.stepper{display:flex;align-items:center;gap:.8rem}
+.stepper button{
+  width:2.4rem;height:2.4rem;
+  font-size:1.2rem;
+  background:rgba(243,238,225,.08);
+  color:var(--ivory);
+  border:1px solid rgba(243,238,225,.16);
+  border-radius:9px;
+  cursor:pointer;
+}
+.stepper button:hover{background:rgba(243,238,225,.18)}
+.stepper button:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+.stepper .val{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:1.4rem;
+  font-weight:600;
+  min-width:1.6rem;
+  text-align:center;
+}
+.switchrow{display:flex;align-items:center;gap:.7rem}
+.switch{
+  position:relative;
+  width:46px;height:26px;
+  background:rgba(243,238,225,.15);
+  border:1px solid rgba(243,238,225,.2);
+  border-radius:13px;
+  cursor:pointer;
+  transition:background .15s;
+  flex-shrink:0;
+}
+.switch::after{
+  content:"";
+  position:absolute;
+  top:2px;left:2px;
+  width:20px;height:20px;
+  background:var(--ivory);
+  border-radius:50%;
+  transition:transform .15s;
+}
+.switch[aria-checked="true"]{background:var(--sage-dim)}
+.switch[aria-checked="true"]::after{transform:translateX(20px)}
+.switch:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+.switchrow span{font-size:.92rem;color:var(--ivory)}
+
+/* ---------- Entropy ---------- */
+.entropy{
+  background:rgba(0,0,0,.22);
+  border:1px solid rgba(243,238,225,.12);
+  border-radius:18px;
+  padding:1.2rem 1.5rem 1.4rem;
+  margin-bottom:2rem;
+}
+.ent-top{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:.7rem;flex-wrap:wrap;gap:.3rem}
+.ent-bits{font-family:'Fraunces',serif;font-weight:700;font-size:1.5rem}
+.ent-bits small{font-family:'IBM Plex Sans',sans-serif;font-weight:400;font-size:.85rem;color:var(--sage)}
+.ent-label{font-size:.9rem;font-weight:600}
+.ent-bar{
+  height:10px;
+  background:rgba(243,238,225,.1);
+  border-radius:5px;
+  overflow:hidden;
+  position:relative;
+}
+.ent-fill{
+  height:100%;
+  border-radius:5px;
+  background:linear-gradient(90deg,#C33B2C,#D9B95C,#9DBBA6);
+  transition:width .4s ease;
+}
+.ent-note{margin-top:.7rem;font-size:.85rem;color:var(--sage)}
+
+/* ---------- Footer ---------- */
+.info{
+  font-size:.85rem;
+  color:var(--sage);
+  line-height:1.65;
+}
+.info p{margin-bottom:.7rem}
+.info .pipdot{
+  display:inline-block;width:7px;height:7px;border-radius:50%;
+  background:var(--pip);vertical-align:baseline;margin:0 .15em;
+}
+.info strong{color:var(--ivory);font-weight:600}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div class="die-mark">⚄</div>
+  <h1><span class="cap">W</span>ürfelwörter</h1>
+  <p class="tagline">Merkbare deutsche Passphrasen – Nomen groß, Verben und Adjektive klein, Zahl am Ende. Alles wird lokal in deinem Browser gewürfelt, nichts verlässt diesen Rechner.</p>
+</header>
+
+<div class="tiles" id="tiles" aria-live="polite"></div>
+
+<div class="copyline">
+  <div class="phrase-out" id="phraseOut" title="Zum Markieren anklicken"></div>
+  <button class="btn btn-copy" id="copyBtn">Kopieren</button>
+</div>
+
+<div class="rollrow">
+  <button class="btn btn-roll" id="rollBtn"><span class="die">⚄</span>Neu würfeln</button>
+</div>
+
+<div class="panel">
+  <div class="ctl">
+    <span class="lbl" id="lblWords">Wörter</span>
+    <div class="stepper" role="group" aria-labelledby="lblWords">
+      <button id="wMinus" aria-label="Ein Wort weniger">−</button>
+      <span class="val" id="wVal">5</span>
+      <button id="wPlus" aria-label="Ein Wort mehr">+</button>
+    </div>
+  </div>
+  <div class="ctl">
+    <span class="lbl" id="lblSep">Trennzeichen</span>
+    <div class="seg" role="group" aria-labelledby="lblSep" id="sepSeg">
+      <button data-sep="-" aria-pressed="true">-</button>
+      <button data-sep="." aria-pressed="false">.</button>
+      <button data-sep="_" aria-pressed="false">_</button>
+      <button data-sep="" aria-pressed="false">keins</button>
+    </div>
+  </div>
+  <div class="ctl">
+    <span class="lbl">Zahl am Ende</span>
+    <div class="switchrow">
+      <button class="switch" id="numSwitch" role="switch" aria-checked="true" aria-label="Zahl am Ende anhängen"></button>
+      <span id="numState">an</span>
+    </div>
+  </div>
+  <div class="ctl">
+    <span class="lbl" id="lblDigits">Ziffern</span>
+    <div class="seg" role="group" aria-labelledby="lblDigits" id="digitSeg">
+      <button data-d="1" aria-pressed="false">1</button>
+      <button data-d="2" aria-pressed="true">2</button>
+      <button data-d="3" aria-pressed="false">3</button>
+      <button data-d="4" aria-pressed="false">4</button>
+    </div>
+  </div>
+</div>
+
+<div class="entropy">
+  <div class="ent-top">
+    <div class="ent-bits"><span id="bitsVal">–</span> <small>Bit Entropie</small></div>
+    <div class="ent-label" id="entLabel"></div>
+  </div>
+  <div class="ent-bar"><div class="ent-fill" id="entFill" style="width:0%"></div></div>
+  <div class="ent-note" id="entNote"></div>
+</div>
+
+<div class="info">
+  <p><strong>Wie es funktioniert:</strong> Jedes Wort wird per Zufall (<code>crypto.getRandomValues</code>) aus einer Liste mit <strong><span id="poolSize">–</span> deutschen Wörtern</strong> gezogen. Nomen stehen in der Liste bereits großgeschrieben und sind mit einem roten Punkt <span class="pipdot"></span> markiert; Verben und Adjektive bleiben klein. Die Groß-/Kleinschreibung ist damit vorhersagbar – sie zählt bewusst <strong>nicht</strong> zur Entropie, macht die Phrase aber leichter merkbar und erfüllt „Großbuchstaben nötig"-Regeln.</p>
+  <p>Die Liste kommt ohne Umlaute und ß aus, damit die Phrase auf jeder Tastatur und in jedem Eingabefeld problemlos tippbar ist. Als Faustregel: 5 Wörter für normale Konten, 6–7 Wörter für Master-Passwörter.</p>
+</div>
+
+</div>
+
+<script>
+// ---------- Wortliste ----------
+// Nomen: großgeschrieben. Verben/Adjektive: klein. Ohne Umlaute und ß.
+const NOMEN = ["Adler","Affe","Ampel","Anker","Antwort","Apfel","Arzt","Ast","Atem","Auge","Auto","Bach","Bad","Bahn","Ball","Banane","Band","Bank","Bart","Bauch","Bauer","Baum","Becher","Beere","Bein","Berg","Beruf","Besen","Besuch","Bett","Beutel","Biene","Bild","Birne","Blatt","Blick","Blitz","Blume","Boden","Bogen","Bohne","Boot","Bote","Braten","Brett","Brief","Brille","Brot","Bruder","Brunnen","Brust","Buch","Burg","Butter","Chor","Dach","Dame","Dampf","Datum","Daumen","Decke","Diamant","Dichter","Ding","Donner","Dorf","Dorn","Drache","Draht","Druck","Duft","Ecke","Ehre","Eiche","Eimer","Eisen","Elefant","Ende","Engel","Ente","Erbse","Erde","Esel","Essig","Eule","Fabrik","Faden","Fahne","Fahrrad","Falke","Falle","Farbe","Fass","Feder","Fehler","Feier","Feige","Feld","Fels","Fenster","Ferse","Feuer","Fieber","Figur","Film","Finger","Fisch","Flamme","Flasche","Fleck","Fliege","Flosse","Flug","Flur","Flut","Forelle","Form","Foto","Frage","Freude","Freund","Frieden","Frosch","Frucht","Fuchs","Funke","Futter","Gabel","Gans","Garten","Gast","Geburt","Gedicht","Gefahr","Geige","Geist","Geld","Gericht","Geruch","Geschenk","Gesicht","Gespenst","Gewitter","Giraffe","Gitter","Glas","Glocke","Gold","Gras","Grenze","Griff","Gruppe","Gurke","Gurt","Haar","Hafen","Hafer","Hahn","Haken","Hals","Hammer","Hand","Handel","Harfe","Hase","Haube","Haufen","Haus","Haut","Hecke","Heft","Heimat","Held","Hemd","Herbst","Herd","Herz","Himmel","Hirsch","Hitze","Hobel","Hof","Honig","Horn","Hose","Hotel","Hund","Hut","Idee","Igel","Insel","Jacke","Jagd","Jahr","Jubel","Jugend","Junge","Juwel","Kabel","Kaffee","Kaiser","Kalb","Kamel","Kamera","Kamin","Kamm","Kanal","Kanne","Kanu","Karotte","Karte","Katze","Kegel","Keks","Keller","Kerze","Kessel","Kette","Kiefer","Kies","Kind","Kino","Kirche","Kirsche","Kissen","Kiste","Klavier","Kleid","Klippe","Knie","Knochen","Knopf","Knoten","Koch","Koffer","Kohl","Kohle","Kompass","Konzert","Kopf","Korb","Korn","Krabbe","Kraft","Kragen","Kran","Kranich","Kranz","Kraut","Krebs","Kreide","Kreis","Kreuz","Krone","Krug","Kuchen","Kugel","Kuh","Kunst","Kupfer","Kurve","Lager","Lampe","Land","Lappen","Laterne","Laub","Lauch","Laune","Leben","Leder","Lehrer","Leim","Leine","Leiter","Lerche","Licht","Lied","Linie","Linse","Lippe","Liste","Loch","Locke","Lotse","Luft","Lunge","Lupe","Magen","Magnet","Mais","Maler","Mantel","Markt","Marmor","Maske","Mast","Mauer","Maus","Meer","Mehl","Meister","Melone","Messer","Metall","Miete","Milch","Minute","Mitte","Mond","Moos","Morgen","Motor","Muschel","Musik","Mut","Mutter","Nabel","Nacht","Nadel","Nagel","Name","Nase","Natur","Nebel","Neffe","Nest","Netz","Norden","Note","Nudel","Nummer","Nuss","Obst","Ofen","Ohr","Oma","Onkel","Opa","Oper","Orange","Orgel","Ort","Osten","Otter","Paar","Paket","Palast","Palme","Panda","Papagei","Papier","Park","Party","Pause","Pech","Pedal","Perle","Pfad","Pfanne","Pfau","Pfeffer","Pfeife","Pfeil","Pferd","Pflanze","Pflaume","Pilot","Pilz","Pinsel","Pirat","Planet","Platz","Post","Preis","Prinz","Probe","Puder","Pumpe","Punkt","Puppe","Qualle","Quelle","Rabe","Rad","Rahmen","Rakete","Rand","Rasen","Ratte","Rauch","Raum","Raupe","Regal","Regen","Reh","Reifen","Reihe","Reis","Reise","Rest","Rezept","Richter","Riese","Rind","Ring","Rippe","Ritter","Rock","Roggen","Rohr","Rolle","Rose","Rost","Ruder","Ruf","Ruhe","Ruine","Runde","Sack","Saft","Salat","Salbe","Salz","Samen","Sand","Sattel","Satz","Schaf","Schale","Schatten","Schatz","Schaufel","Schaum","Schere","Schiff","Schild","Schirm","Schlange","Schlitten","Schloss","Schlucht","Schnee","Schnur","Schrank","Schraube","Schrift","Schuh","Schule","Schulter","Schwan","Schwester","See","Segel","Seife","Seil","Seite","Sekunde","Sessel","Sieb","Sieg","Silber","Sirup","Sitz","Socke","Sofa","Sohn","Sommer","Sonne","Sorge","Spargel","Spaten","Spatz","Speck","Speise","Spiegel","Spiel","Spinne","Sport","Sprache","Spur","Stadt","Stall","Stamm","Star","Staub","Stein","Stelle","Stempel","Stern","Steuer","Stiefel","Stier","Stift","Stimme","Stirn","Stock","Stoff","Storch","Strand","Strecke","Strom","Strudel","Stufe","Stuhl","Stunde","Sturm","Suppe","Tafel","Tag","Tal","Tanne","Tante","Tanz","Tasche","Tasse","Tau","Taube","Tee","Teich","Teig","Teil","Teller","Tempel","Teppich","Text","Theater","Thron","Tiger","Tinte","Tisch","Tochter","Tomate","Ton","Topf","Tor","Torte","Traktor","Traube","Traum","Treppe","Trick","Tropfen","Trost","Truhe","Tuch","Tulpe","Tunnel","Turm","Ufer","Uhr","Umzug","Urlaub","Vase","Vater","Ventil","Vers","Vieh","Vogel","Volk","Vorhang","Wache","Waffel","Wagen","Wal","Wald","Wand","Wange","Wanne","Ware","Wein","Welle","Welt","Weste","Wetter","Wiege","Wiese","Wind","Winkel","Winter","Wipfel","Wolf","Wolke","Wolle","Wort","Wunder","Wunsch","Wurm","Wurst","Wurzel","Zahl","Zahn","Zange","Zaun","Zebra","Zehe","Zeile","Zeit","Zelt","Ziege","Ziel","Zimmer","Zimt","Zirkus","Zitrone","Zopf","Zucker","Zug","Zunge","Zwerg","Zwiebel","Zweig"];
+
+const VERBEN = ["angeln","atmen","backen","baden","bauen","beben","beten","biegen","bieten","binden","bitten","blasen","bleiben","blicken","blinken","bohren","brauchen","brechen","brennen","bringen","brummen","buchen","danken","denken","dichten","dienen","drehen","ducken","duften","ehren","eilen","enden","erben","fahren","fallen","falten","fangen","fassen","fegen","feiern","filmen","finden","fischen","fliegen","fliehen","folgen","formen","forschen","fragen","frieren","geben","gehen","gelten","gewinnen","glauben","gleiten","graben","greifen","grinsen","haben","haften","halten","handeln","hauen","heben","heilen","heizen","helfen","heulen","hoffen","holen","hopsen","hupen","husten","jagen","jubeln","kauen","kaufen","kichern","klagen","klappen","kleben","klettern","klingen","klopfen","kneten","kochen","kommen","kosten","kratzen","kriechen","lachen","laden","landen","laufen","lauschen","leben","legen","lehren","leihen","lernen","lesen","leuchten","lieben","liefern","liegen","loben","locken","malen","meiden","meinen","melden","melken","merken","messen","mischen","murmeln","nagen","nehmen","neigen","nicken","nieseln","packen","parken","passen","pfeifen","pflanzen","planen","platzen","proben","pumpen","putzen","raten","rauschen","rechnen","reden","regnen","reiben","reimen","reisen","reiten","rennen","retten","riechen","ringen","rodeln","rollen","rosten","rudern","rufen","ruhen","sagen","sammeln","saugen","schauen","schenken","schieben","schlafen","schmecken","schneiden","schreiben","schwimmen","segeln","sehen","senden","senken","singen","sinken","sitzen","spielen","sparen","springen","staunen","stehen","steigen","stellen","sticken","stimmen","streichen","streuen","suchen","tanzen","tasten","tauchen","tauen","teilen","tragen","treffen","trennen","treten","trinken","trocknen","turnen","wandern","warten","waschen","weben","wecken","weinen","werfen","wiegen","winken","wippen","wohnen","zeigen","zelten","ziehen","zwinkern"];
+
+const ADJEKTIVE = ["artig","bequem","blank","blass","blau","braun","breit","bunt","dicht","dick","dunkel","eckig","edel","eifrig","eilig","einfach","eisig","emsig","eng","ernst","fair","falsch","faul","fein","fern","feucht","flach","flink","flott","frech","frei","fremd","froh","gelb","gerade","gering","gesund","glatt","golden","grau","grob","gut","hager","hart","heiser","hell","herb","hoch","hohl","jung","kahl","kalt","klar","klein","klug","knapp","krumm","kurz","lahm","lang","laut","lecker","leer","leicht","leise","lila","locker","luftig","lustig","mager","matt","mild","munter","mutig","nah","nass","nett","neu","oval","prima","rasch","rau","reich","reif","rein","rosa","rot","ruhig","rund","sanft","satt","sauber","sauer","scharf","scheu","schick","schief","schlau","schmal","schnell","schwarz","schwer","seicht","selten","sicher","silbern","spitz","stark","steil","still","stolz","stumm","tapfer","teuer","tief","treu","trocken","wach","wahr","warm","weich","weise","weit","wild","winzig","zahm","zart"];
+
+// Pool bauen und Duplikate (case-insensitiv) entfernen
+const seen = new Set();
+const POOL = [];
+for (const arr of [NOMEN, VERBEN, ADJEKTIVE]) {
+  for (const w of arr) {
+    const k = w.toLowerCase();
+    if (!seen.has(k)) { seen.add(k); POOL.push(w); }
+  }
+}
+const NOUN_SET = new Set(NOMEN.map(w => w.toLowerCase()));
+
+// ---------- Zustand ----------
+const state = { words: 5, sep: "-", useNum: true, digits: 2 };
+let current = { parts: [], number: "" };
+
+// ---------- Kryptographisch sicherer Zufall ----------
+function randInt(max) {
+  const limit = 4294967296 - (4294967296 % max);
+  const buf = new Uint32Array(1);
+  let x;
+  do { crypto.getRandomValues(buf); x = buf[0]; } while (x >= limit);
+  return x % max;
+}
+
+// ---------- Generieren ----------
+function roll() {
+  const parts = [];
+  for (let i = 0; i < state.words; i++) parts.push(POOL[randInt(POOL.length)]);
+  let number = "";
+  if (state.useNum) {
+    for (let i = 0; i < state.digits; i++) number += randInt(10);
+  }
+  current = { parts, number };
+  render();
+}
+
+function phraseString() {
+  let s = current.parts.join(state.sep);
+  if (state.useNum && current.number) s += state.sep + current.number;
+  return s;
+}
+
+// ---------- Anzeige ----------
+function render() {
+  const tiles = document.getElementById("tiles");
+  tiles.innerHTML = "";
+  current.parts.forEach((w, i) => {
+    if (i > 0 && state.sep) addSep(tiles);
+    const t = document.createElement("span");
+    t.className = "tile" + (NOUN_SET.has(w.toLowerCase()) ? " noun" : "");
+    t.style.animationDelay = (i * 60) + "ms";
+    t.textContent = w;
+    tiles.appendChild(t);
+  });
+  if (state.useNum && current.number) {
+    if (state.sep) addSep(tiles);
+    const t = document.createElement("span");
+    t.className = "tile num";
+    t.style.animationDelay = (current.parts.length * 60) + "ms";
+    t.textContent = current.number;
+    tiles.appendChild(t);
+  }
+  document.getElementById("phraseOut").textContent = phraseString();
+  renderEntropy();
+}
+
+function addSep(parent) {
+  const s = document.createElement("span");
+  s.className = "tile sep";
+  s.textContent = state.sep;
+  parent.appendChild(s);
+}
+
+function renderEntropy() {
+  const perWord = Math.log2(POOL.length);
+  let bits = state.words * perWord;
+  if (state.useNum) bits += state.digits * Math.log2(10);
+  const b = Math.round(bits * 10) / 10;
+  document.getElementById("bitsVal").textContent = b.toLocaleString("de-DE");
+
+  let label, color;
+  if (bits < 45)      { label = "schwach";     color = "#C33B2C"; }
+  else if (bits < 60) { label = "brauchbar";   color = "#D9B95C"; }
+  else if (bits < 80) { label = "stark";       color = "#9DBBA6"; }
+  else                { label = "sehr stark";  color = "#9DBBA6"; }
+  const el = document.getElementById("entLabel");
+  el.textContent = label;
+  el.style.color = color;
+  document.getElementById("entFill").style.width = Math.min(100, bits / 110 * 100) + "%";
+
+  // Knackzeit-Schätzung: Offline-Angriff mit 10^12 Versuchen/s, halber Suchraum
+  const seconds = Math.pow(2, bits - 1) / 1e12;
+  document.getElementById("entNote").textContent =
+    "Durchschnittliche Knackzeit bei 1 Billion Versuchen pro Sekunde (Offline-Angriff): " + humanTime(seconds) + ".";
+}
+
+function humanTime(s) {
+  if (s < 1) return "unter einer Sekunde";
+  const units = [
+    [31557600 * 1e9, "Mrd. Jahre"],
+    [31557600 * 1e6, "Mio. Jahre"],
+    [31557600 * 1e3, "Tsd. Jahre"],
+    [31557600, "Jahre"],
+    [86400, "Tage"],
+    [3600, "Stunden"],
+    [60, "Minuten"],
+    [1, "Sekunden"]
+  ];
+  for (const [u, name] of units) {
+    if (s >= u) {
+      const v = s / u;
+      const num = v >= 100 ? Math.round(v).toLocaleString("de-DE")
+                          : (Math.round(v * 10) / 10).toLocaleString("de-DE");
+      return "ca. " + num + " " + name;
+    }
+  }
+  return "unter einer Sekunde";
+}
+
+// ---------- Bedienung ----------
+document.getElementById("rollBtn").addEventListener("click", (e) => {
+  const btn = e.currentTarget;
+  btn.classList.add("rolling");
+  setTimeout(() => btn.classList.remove("rolling"), 400);
+  roll();
+});
+
+document.getElementById("copyBtn").addEventListener("click", async () => {
+  const btn = document.getElementById("copyBtn");
+  try {
+    await navigator.clipboard.writeText(phraseString());
+  } catch (err) {
+    // Fallback: Text markieren
+    const out = document.getElementById("phraseOut");
+    const range = document.createRange();
+    range.selectNodeContents(out);
+    const sel = getSelection();
+    sel.removeAllRanges();
+    sel.addRange(range);
+    document.execCommand("copy");
+  }
+  btn.textContent = "Kopiert";
+  btn.classList.add("done");
+  setTimeout(() => { btn.textContent = "Kopieren"; btn.classList.remove("done"); }, 1500);
+});
+
+document.getElementById("wMinus").addEventListener("click", () => {
+  if (state.words > 3) { state.words--; syncWords(); roll(); }
+});
+document.getElementById("wPlus").addEventListener("click", () => {
+  if (state.words < 10) { state.words++; syncWords(); roll(); }
+});
+function syncWords() { document.getElementById("wVal").textContent = state.words; }
+
+document.getElementById("sepSeg").addEventListener("click", (e) => {
+  const b = e.target.closest("button");
+  if (!b) return;
+  state.sep = b.dataset.sep;
+  for (const btn of e.currentTarget.querySelectorAll("button"))
+    btn.setAttribute("aria-pressed", btn === b ? "true" : "false");
+  render();
+});
+
+document.getElementById("numSwitch").addEventListener("click", (e) => {
+  state.useNum = !state.useNum;
+  e.currentTarget.setAttribute("aria-checked", String(state.useNum));
+  document.getElementById("numState").textContent = state.useNum ? "an" : "aus";
+  if (state.useNum && !current.number) {
+    let n = ""; for (let i = 0; i < state.digits; i++) n += randInt(10);
+    current.number = n;
+  }
+  render();
+});
+
+document.getElementById("digitSeg").addEventListener("click", (e) => {
+  const b = e.target.closest("button");
+  if (!b) return;
+  state.digits = parseInt(b.dataset.d, 10);
+  for (const btn of e.currentTarget.querySelectorAll("button"))
+    btn.setAttribute("aria-pressed", btn === b ? "true" : "false");
+  let n = ""; for (let i = 0; i < state.digits; i++) n += randInt(10);
+  current.number = n;
+  render();
+});
+
+// ---------- Start ----------
+document.getElementById("poolSize").textContent = POOL.length.toLocaleString("de-DE");
+roll();
+</script>
+</body>
+</html>
