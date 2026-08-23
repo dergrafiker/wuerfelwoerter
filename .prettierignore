@@ -1,0 +1,7 @@
+node_modules/
+
+# index.html enthaelt das CSS inline in einem bewusst kompakten Stil
+# (eine Regel pro Zeile). Prettier wuerde die rund 300 Zeilen komplett
+# umbrechen - viel Diff ohne Gewinn. Wer das anders sieht, loescht die
+# Zeile und laesst `npm run format` einmal durchlaufen.
+index.html
