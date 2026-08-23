@@ -1,3 +1,22 @@
+// ---------- Vorbedingung: sicherer Zufall ----------
+// Ohne diese Pruefung wuerde ein Browser ohne crypto.getRandomValues erst beim
+// ersten Wurf mit einer unbehandelten Exception scheitern: die Seite saehe
+// intakt aus, bliebe aber einfach leer. Deshalb sofort pruefen, sichtbar
+// scheitern und die Bedienelemente stilllegen. Ein Ausweichen auf Math.random
+// kommt nicht in Frage - das waere fuer Passphrasen unsicher.
+if (typeof crypto === "undefined" || typeof crypto.getRandomValues !== "function") {
+  const note = document.createElement("p");
+  note.className = "crypto-error";
+  note.setAttribute("role", "alert");
+  note.textContent =
+    "Dieser Browser stellt keinen kryptographisch sicheren Zufall " +
+    "(crypto.getRandomValues) bereit. Ohne ihn lassen sich keine sicheren " +
+    "Passphrasen würfeln – bitte einen aktuellen Browser verwenden.";
+  document.querySelector("header").after(note);
+  for (const b of document.querySelectorAll("button")) b.disabled = true;
+  throw new Error("crypto.getRandomValues nicht verfügbar");
+}
+
 // ---------- Wortliste ----------
 // Nomen: großgeschrieben. Verben/Adjektive: klein. Ohne Umlaute und ß.
 // prettier-ignore
