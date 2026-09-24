@@ -159,12 +159,14 @@ function renderEntropy() {
   el.style.color = color;
   document.getElementById("entFill").style.width = Math.min(100, (bits / MAX_BITS) * 100) + "%";
 
-  // Knackzeit-Schätzung: Offline-Angriff mit 10^12 Versuchen/s, halber Suchraum
-  const seconds = Math.pow(2, bits - 1) / 1e12;
-  document.getElementById("entNote").textContent =
-    "Durchschnittliche Knackzeit bei 1 Billion Versuchen pro Sekunde (Offline-Angriff): " +
-    humanTime(seconds) +
-    ".";
+  // Knackzeit-Schätzung: Offline-Angriff, im Mittel wird der halbe Suchraum
+  // durchsucht. Die Raten der Angreifer-Stufen stehen als data-gps im Markup
+  // (siehe #entTiers) - hier nur auslesen, damit Anzeige und Rechnung nicht
+  // auseinanderlaufen koennen.
+  const halfSearchSpace = Math.pow(2, bits - 1);
+  for (const dd of document.querySelectorAll("#entTiers dd[data-gps]")) {
+    dd.textContent = humanTime(halfSearchSpace / Number(dd.dataset.gps));
+  }
 }
 
 const TIME_UNITS = [
