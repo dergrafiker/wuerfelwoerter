@@ -52,7 +52,7 @@ const MAX_DIGITS = Math.max(
 );
 
 // ---------- Zustand ----------
-const state = { words: 5, sep: "-", useNum: true, digits: 2 };
+const state = { words: 6, sep: "-", useNum: true, digits: 2 };
 let current = { parts: [], number: "" };
 
 // ---------- Kryptographisch sicherer Zufall ----------
